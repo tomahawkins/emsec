@@ -1,14 +1,4 @@
-emsec -- A programming language for embedded security.
-
-C is good enough:
-
-  - At least it is expressive enough for nearlly all embedded developers.
-  - Higher order languages great, but apparently not practical, possible, socially accepted for embedded.
-    - Many embedded application can't use automatic memory management.
-    - Some applications can't have dynamic memory allocation.
-    - Higher orderness harder to verify.
-
-Take useful stuff from C, get rid of the dark corners, augment with types, contracts, and security labels.
+emsec -- A programming language for secure embedded software.
 
 Lofty Goal: Ability to prove absense of all runtime errors:
   - div-by-zero
@@ -106,28 +96,12 @@ Compiler Process (to C):
   3. Convert to multiple arguments for function defs and apps.
   4. Lambda lift.
 
-  - Maybe proff requires non-nested functions.  If so:
+  - Maybe proof requires non-nested functions.  If so:
   1. Partial eval.
   2. Convert to multi-args.
   3. Lambda lift.
   4. Prove and remove.
 
-
-
-
-
-Syntax:
-
-  program ::= module { module }
-
-  expr ::=
-    | ()   // Unit.
-    | expr expr { expr }    // Function call.
-    | 
-
-  type ::=
-    | ()
-    | type { type } -> type  // Function type.
-
-
+Compiler Optimizations:
+  - If array (tuple) contains refs, optimize refs aways.  Use array for updates.
 
