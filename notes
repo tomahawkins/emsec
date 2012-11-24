@@ -1,0 +1,133 @@
+emsec -- A programming language for embedded security.
+
+C is good enough:
+
+  - At least it is expressive enough for nearlly all embedded developers.
+  - Higher order languages great, but apparently not practical, possible, socially accepted for embedded.
+    - Many embedded application can't use automatic memory management.
+    - Some applications can't have dynamic memory allocation.
+    - Higher orderness harder to verify.
+
+Take useful stuff from C, get rid of the dark corners, augment with types, contracts, and security labels.
+
+Lofty Goal: Ability to prove absense of all runtime errors:
+  - div-by-zero
+  - referencing uninitialized data
+  - information leaks
+  - control flow hijacking
+
+
+Language Features:
+
+  - Simple module system like Haskell's.
+  - Only top level functions.
+    - Nested function only if they won't require closures.
+  - Functions are first class (passing function references), but not higher order (no nested functions that escape).
+    - Probably no partial arguments, but make OK in right conditions.
+  - Functions (operators) with infix syntax (borrow from Haskell).
+
+  - A higher order macro/meta language elaborated at compile-time.
+    Q: Is meta language statically typed?
+  - A higher order contract/assertion language.  Contracts proved and removed by compiler.
+
+  - Types:
+    - Uninitialized
+    - Tuples  (immutable)
+    - Arrays  (immutable)
+    - Refs    (mutable)
+    - Datatypes or Variants
+    - For object code, all types must have a known size.  This implies no recurisve types.
+      But recursive types can be used for meta programming.
+  
+  - No pointers.  Malloc returns array references filled with Uninitialized.  In-bound array references are verified by compiler.
+    Q: Is it possible to build recursive data structures without pointers?
+    A: I think so.  Something like (ignoring type specs):
+      a = malloc 22;     // Array of uninitialized data.
+      b = malloc 22;
+      a[0] = b;
+      b[0] = a;  // At this point, the first element in a and b are initialized.
+    A: Yes, recursive structures are assembled with ref cells.  Ref cells break the recursive loops.
+
+  - Evaluation Strategy:  Call-by-value.
+    - Input arguments and return are copied down to ref cell nodes.
+    - Problem: Ref cell gets local data (stack).  On return, data will be deleted.
+    Q: How to ensure that ref cells to not capture data from stack?
+       Solution 1: Ref cells can only reference global data.
+         Q: But then what modifies global data?
+         A: Maybe top-level refs are allocated memory.  Reads and writes modifies this memory.
+       Solution 2: Provide memory allocation and explicit deallocation.
+       If a function produces data that must go into a ref, the function must allocate memory for it.
+
+       -- Combinator for deallocation.  Ref memory deallocated on new write:
+       deallocWrite :: Ref a -> a -> IO ()
+
+       -- Deallocates mem.  Replaces with uninitialized.
+       deallocRef :: Ref a -> IO ()
+
+       -- Allocate a new value.
+       alloc :: Ref a -> a -> IO ()
+
+    - On a ref assignment, not simply a pointer redirection, but a deep copy (down to other ref cells).
+      This way, stack (local) data gets copied into ref before function is returned and stack is popped.
+
+  - Static number of principals.
+  - Each module specifies responsible principal and allowable flow-to/flow-from principals.
+    - Or separate specification defines allowable information flow.
+
+Contract Syntax:
+
+  f :: (a :: Int) => Int && {x | x > a}
+  f (a :: Int) (b :: Int) -> Int = ...
+
+  \ (a :: Int) (b :: Int) -> Int = ...
+
+  - Syntax to distinguish between pure and impure functions:  -> (pure) => (impure)
+
+  f :: Int -> Int
+  f :: Int -> Int => Int
+
+
+Partial Evaluation to convert Higher-Order to C-like
+  - Enables language to be a meta/macro language.
+
+  - Conversion to multiple args:
+
+    \ {x : C1} : C2 -> {y : C3} : C4 -> z
+
+    AppCtc (Lam x $ AppCtc (Lam y z) $ FunCtc y C3 C4) $ FunCtc x C1 C2
+    
+    =>
+
+    AppCtc
+
+Compiler Process (to C):
+  1. Partial Eval, null effect remove, constant prop.
+  2. Prove and remove contracts.
+  3. Convert to multiple arguments for function defs and apps.
+  4. Lambda lift.
+
+  - Maybe proff requires non-nested functions.  If so:
+  1. Partial eval.
+  2. Convert to multi-args.
+  3. Lambda lift.
+  4. Prove and remove.
+
+
+
+
+
+Syntax:
+
+  program ::= module { module }
+
+  expr ::=
+    | ()   // Unit.
+    | expr expr { expr }    // Function call.
+    | 
+
+  type ::=
+    | ()
+    | type { type } -> type  // Function type.
+
+
+
