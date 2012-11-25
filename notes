@@ -76,6 +76,17 @@ Contract Syntax:
   f :: Int -> Int
   f :: Int -> Int => Int
 
+  Q: How to express polymorphic type constraints like: fst :: (a, _) -> a?
+
+  A: Pass in a contract to specify the poly:
+     fst (c : Contract) (t : (:c, Any:)) -> c =
+
+     This would require an extra argument for all polymorphic functions.
+
+     Is (c, Any) a tuple of contracts or a contract itself?  How about different syntax:
+       (a, b, c)    -- A tuple of values.
+       (:a, b, c:)  -- A tuple contract.
+ 
 
 Partial Evaluation to convert Higher-Order to C-like
   - Enables language to be a meta/macro language.
@@ -95,6 +106,8 @@ Compiler Process (to C):
   2. Prove and remove contracts.
   3. Convert to multiple arguments for function defs and apps.
   4. Lambda lift.
+
+  Q: Can all proofs take place on the full lambda IR?
 
   - Maybe proof requires non-nested functions.  If so:
   1. Partial eval.

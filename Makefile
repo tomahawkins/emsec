@@ -1,4 +1,4 @@
 .PHONY: all
 all:
-	runhaskell -W IR.hs
+	runhaskell -W Main.hs
 
