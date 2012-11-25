@@ -1,30 +1,46 @@
 module IR
   ( Expr    (..)
   , Purity  (..)
-  , Literal (..)
+  , Lit     (..)
+  , Pat     (..)
+  , Loc     (..)
   , Var
   ) where
 
+-- | Source locations: file, line, column.
+data Loc = Loc String Int Int
+
 data Expr
-  = Var     Var
-  | Lam     Var Expr
-  | PredCtc Var Expr
-  | FunCtc  Purity Var Expr Expr
-  | App     Expr Expr
-  | AppCtc  Expr Expr  -- ^ value : contract
-  | AppPrim String [Expr]
-  | Let     Var Expr Expr
-  | LetRec  [(Var, Expr)] Expr
-  | Literal Literal
-  | Assign  Expr Expr  -- ^ Assign a value to a ref cell.
-  | Ref     Expr       -- ^ Get contents of ref cell.
+  = Var     Loc Var
+  | Lam     Loc Var Expr
+  | PredCtc Loc Var Expr
+  | FunCtc  Loc Purity Var Expr Expr  -- ^ purity, input var, domain, dependent codomain.
+  | App     Loc Expr Expr
+  | AppCtc  Loc Expr Expr  -- ^ value : contract
+  | AppPrim Loc String [Expr]
+  | Let     Loc Var Expr Expr
+  | LetRec  Loc [(Var, Expr)] Expr
+  | Lit     Loc Lit
+  | Assign  Loc Expr Expr  -- ^ Assign a value to a ref cell, returns unit.
+  | Ref     Loc Expr       -- ^ Get contents of ref cell.
+  | Case    Loc Expr [(Pat, Expr)]
 
 data Purity
   = Pure
   | Impure
 
-data Literal
-  = Bits Int Integer  -- ^ Width and value.
+data Lit
+  = Unit
+  | Bool Bool
+  | Bits Int Integer  -- ^ Width and value.
 
 type Var = String
+
+data Pat
+  = PVar Var
+  | PWildcard
+  | PTuple [Pat]
+  | PArray [Pat]
+  | PAt Var Pat  -- ^ a@pattern
+  | PCtor Var [Pat]
 

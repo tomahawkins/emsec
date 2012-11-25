@@ -102,19 +102,15 @@ Partial Evaluation to convert Higher-Order to C-like
     AppCtc
 
 Compiler Process (to C):
-  1. Partial Eval, null effect remove, constant prop.
-  2. Prove and remove contracts.
-  3. Convert to multiple arguments for function defs and apps.
-  4. Lambda lift.
+  1. Verify IFC.  
+  2. Verify purity annotations.
+  3. Partial eval, null effect remove, constant prop.  Contracts inlined down to primitives.
+  4. Prove and remove contracts.
+  5. Convert to multiple arguments for function defs and apps.
+  6. Lambda lift.
 
   Q: Can all proofs take place on the full lambda IR?
 
-  - Maybe proof requires non-nested functions.  If so:
-  1. Partial eval.
-  2. Convert to multi-args.
-  3. Lambda lift.
-  4. Prove and remove.
-
 Compiler Optimizations:
-  - If array (tuple) contains refs, optimize refs aways.  Use array for updates.
+  - Array (tuple) that contain refs, the refs can be optimized away, replaced with mutable array operations.
 

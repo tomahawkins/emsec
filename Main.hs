@@ -1,7 +1,7 @@
 module Main (main) where
 
 import IR ()
-import CL ()
+--import CL ()
 
 main :: IO ()
 main = return ()
