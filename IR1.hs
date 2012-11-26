@@ -1,4 +1,4 @@
-module IR
+module IR1
   ( Expr    (..)
   , Purity  (..)
   , Lit     (..)
@@ -38,6 +38,7 @@ type Var = String
 
 data Pat
   = PVar Var
+  | PLit Lit
   | PWildcard
   | PTuple [Pat]
   | PArray [Pat]

@@ -1,6 +1,6 @@
 module Main (main) where
 
-import IR ()
+import IR2 ()
 --import CL ()
 
 main :: IO ()
